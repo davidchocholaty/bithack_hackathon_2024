@@ -7,6 +7,7 @@
 }
 
 /* Base styles */
+
 * {
   font-family: "Roboto", Arial, sans-serif;
   box-sizing: border-box;
@@ -56,56 +57,87 @@ body {
 }
 
 .sidebar h1 {
-    padding-bottom: 20px;
+  padding-bottom: 20px;
 }
 /* Facilities */
 .facility-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  overflow: auto;
+  max-height: 600px;
 }
 
 .facility-row {
-    cursor: pointer;
-    border-radius: 15px;
-    padding: 20px;
+  cursor: pointer;
+  border-radius: 15px;
+  padding: 20px;
 }
 /* Healthbar */
 .healthbar-container {
-    width: 100%;
-    background-color: #e0e0e0;
-    border-radius: 15px;
-    overflow: hidden;
-    position: relative;
-    height: 10px;
-    margin-bottom: 10px; /* Space between health bars */
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  height: 10px;
+  margin-bottom: 10px; /* Space between health bars */
 }
 .healthbar {
-    height: 100%;
-    background-color: #76c7c0; /* Default color */
-    transition: width 1s;
+  height: 100%;
+  background-color: #76c7c0; /* Default color */
+  transition: width 1s;
 }
 .healthbar-full {
-    background-color: #76c7c0; /* Good occupancy */
+  background-color: #76c7c0; /* Good occupancy */
 }
 .healthbar-warning {
-    background-color: #ffcc00; /* Warning color */
+  background-color: #ffcc00; /* Warning color */
 }
 .healthbar-danger {
-    background-color: #ff4444; /* Danger color */
+  background-color: #ff4444; /* Danger color */
 }
 
 .facility-row.active {
-    background-color: var(--primary);
-    color: white;
-    border-radius: 15px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 15px;
+}
+
+.facility-row {
+  background-color: white;
+  color: black;
+  border-radius: 15px;
+}
+
+/* Alternatively, you can hide just the vertical scrollbar */
+.facility-wrap {
+  padding: 20px;
+  border-radius: 15px;
+  background: rgb(237, 237, 237);
+  background: linear-gradient(
+    0deg,
+    rgba(237, 237, 237, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  overflow-y: scroll; /* Keep scroll functionality, hide scrollbar */
+  scrollbar-width: none; /* For Firefox */
+}
+
+/* Hide the scrollbar in WebKit browsers */
+.facility-wrap::-webkit-scrollbar {
+  display: none; /* Hides the scrollbar */
+}
+
+.logo-wrap {
+    padding-top: 70px;
 }
 /* ====== DASHBOARD ====== */
 .dashboard {
   flex: 1;
   color: #111504;
   background-color: #efeaea;
-  padding: 50px;
+  padding: 50px 100px;
 }
 
 .stats-columns > div > div {
@@ -115,8 +147,22 @@ body {
   background-color: var(--secondary);
 }
 
+.stat-heading {
+    font-size: 24px;
+}
+
+.stats-columns span {
+    font-size: 30px;
+}
+.col-md-6 > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+#facility-address {
+    font-size: 20px;
+}
 .plot-columns > div > div {
-  height: 150px;
   padding: 20px;
   background-color: white;
   border-radius: 15px;
