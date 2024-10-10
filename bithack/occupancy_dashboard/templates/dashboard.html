@@ -1,28 +1,48 @@
 <div class="dashboard">
-    <h1 id="dashboard-heading">{{ default_facility.name }} Dashboard</h1> <!-- Use default facility name -->
-    <div class="container mt-5">
-        <div class="row stats-columns">
-            <div class="col-md-3">
-                <div class="p-3 text-white text-center">Occupied: <span id="occupied-count">{{ default_facility.count }}</span></div>
-            </div>
-            <div class="col-md-3">
-                <div class="p-3 text-white text-center">Total Capacity: <span id="total-capacity">{{ default_facility.capacity }}</span></div>
-            </div>
-            <div class="col-md-3">
-                <div class="p-3 text-white text-center">Day Count: <span id="day-count">{{ default_facility.day_count }}</span></div>
-            </div>
-            <div class="col-md-3">
-                <div class="p-3 text-white text-center">Address: <span id="facility-address">{{ default_facility.address }}</span></div>
-            </div>
+  <h1 id="dashboard-heading">{{ default_facility.name }} Dashboard</h1>
+  <!-- Use default facility name -->
+  <div class="container mt-5">
+    <div class="row stats-columns">
+      <div class="col-md-3">
+        <div class="p-3 text-white text-center">
+          Occupied:
+          <span id="occupied-count">{{ default_facility.count }}</span>
         </div>
-
-        <div class="row mt-4 plot-columns">
-            <div class="col-md-6">
-                <div class="p-3 text-white text-center">Occupancy Rate: <span id="occupancy-rate">{{ default_facility.occupancy_percentage|floatformat:2 }}%</span></div>
-            </div>
-            <div class="col-md-6">
-                <div class="p-3 text-white text-center">Facility: <span id="facility-name">{{ default_facility.name }}</span></div>
-            </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3 text-white text-center">
+          Total Capacity:
+          <span id="total-capacity">{{ default_facility.capacity }}</span>
         </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3 text-white text-center">
+          Day Count:
+          <span id="day-count">{{ default_facility.day_count }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3 text-white text-center">
+          Address:
+          <span id="facility-address">{{ default_facility.address }}</span>
+        </div>
+      </div>
     </div>
+
+    <div class="row mt-4 plot-columns">
+      <div class="col-md-6">
+        <div class="p-3 text-white text-center">
+          Occupancy Rate:
+          <span id="occupancy-rate"
+            >{{ default_facility.occupancy_percentage|floatformat:2 }}%</span
+          >
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-3 text-white text-center">
+          Facility: <span id="facility-name">{{ default_facility.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
