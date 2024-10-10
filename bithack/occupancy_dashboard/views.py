@@ -110,20 +110,21 @@ def get_facility_data(request, facility_id):
     
       #facility_name = default_facility.get("name", "")
     facility_names = {
-        1: "",
-        2: "",
-        3: "",
-        4: "",
-        5: "",
-        6: "",
-        7: "",
-        8: "",
-        9: "",
-        10: "",
-        11: "",
-        12: "",
+        1: "AQP Kohoutovice",
+        2: "AQP Kohoutovice",
+        3: "LRC Rašínova",
+        4: "LRC Rašínova",
+        5: "LRC Rašínova",
+        6: "MPS Lužánky",
+        7: "KPB Ponávka",
+        8: "KLU Kluziště",
+        9: "LK Zábrdovice",
+        10: "RIV Koupaliště",
+        11: "MPS Lužánky",
+        12: "VOD Kluziště",
     }
-    facility_data = data[data['Facility'] == "MPS Lužánky"]
+    
+    facility_data = data[data['Facility'] == facility_names[facility["id"]]]
 
     current_weekday = datetime.now().strftime('%A')
     facility_data.loc[:, 'Weekday'] = pd.to_datetime(facility_data[['Year', 'Month', 'Day']]).dt.day_name()
@@ -144,6 +145,7 @@ def get_facility_data(request, facility_id):
         facility["occupancy_percentage"] = (
             facility["count"] / facility["capacity"]
         ) * 100
+        facility["chart_data"] = chart_data
         return JsonResponse(facility)
     else:
         return JsonResponse({"error": "Facility not found"}, status=404)
@@ -188,7 +190,23 @@ def main_page(request):
     # Choose a default facility to display (e.g., the first one)
     default_facility = facilities[0] if facilities else {}
      #facility_name = default_facility.get("name", "")
-    facility_data = data[data['Facility'] == "KLU Kluziště"]
+    facility_names = {
+        1: "AQP Kohoutovice",
+        2: "AQP Kohoutovice",
+        3: "LRC Rašínova",
+        4: "LRC Rašínova",
+        5: "LRC Rašínova",
+        6: "MPS Lužánky",
+        7: "KPB Ponávka",
+        8: "KLU Kluziště",
+        9: "LK Zábrdovice",
+        10: "RIV Koupaliště",
+        11: "MPS Lužánky",
+        12: "VOD Kluziště",
+    }
+    
+     
+    facility_data = data[data['Facility'] == "AQP Kohoutovice"]
 
     current_weekday = datetime.now().strftime('%A')
     facility_data.loc[:, 'Weekday'] = pd.to_datetime(facility_data[['Year', 'Month', 'Day']]).dt.day_name()

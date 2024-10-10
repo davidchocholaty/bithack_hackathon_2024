@@ -24,7 +24,7 @@ function handleFacilityClick(event) {
   // Fetch facility data from the backend
   const facilityId = clickedElement.getAttribute("data-facility-id");
 
-  console.log(facilityId);
+  //   console.log(facilityId);
   fetch(`facility/${facilityId}/`)
     .then((response) => {
       if (!response.ok) {
@@ -33,7 +33,6 @@ function handleFacilityClick(event) {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
       updateDashboard(data); // Call the updateDashboard function with the fetched data
     })
     .catch((error) => {
@@ -51,29 +50,110 @@ function updateDashboard(data) {
     console.error("Invalid data format:", data);
     return; // Exit if data is not valid
   }
+  console.log(data);
+
+  // Safeguard access to facility and chart_data
+  let facility = data.facility;
+//   const chartData = data.facility.chart_data;
+
+  console.log(facility);
+  console.log(chartData);
+  if (!facility || !chartData) {
+    facility = data;
+    // console.error("Missing facility or chart data:", data);
+    // return; // Exit if facility or chart data is missing
+  }
 
   // Get facility data from the fetched JSON
-  const facilityName = data.name;
-  const occupiedCount = data.count;
-  const totalCapacity = data.capacity;
-  const dayCount = data.day_count;
-  const address = data.address;
+  const facilityName = facility.name;
+  const occupiedCount = facility.count;
+  const totalCapacity = facility.capacity;
+  const dayCount = facility.day_count;
+  const address = facility.address;
 
   // Calculate occupancy rate
   const occupancyRate = ((occupiedCount / totalCapacity) * 100).toFixed(2);
 
   // Update the dashboard heading with the facility name
-  document.getElementById(
-    "dashboard-heading"
-  ).innerText = `${facilityName} Dashboard`;
+  document.getElementById("dashboard-heading").innerText = `${facilityName}`;
 
   // Update the dashboard items with facility data
-  document.getElementById("occupied-count").innerText = occupiedCount;
-  document.getElementById("total-capacity").innerText = totalCapacity;
-  document.getElementById("day-count").innerText = dayCount;
-  document.getElementById("facility-address").innerText = address;
-  document.getElementById("occupancy-rate").innerText = occupancyRate;
-  document.getElementById("facility-name").innerText = facilityName;
+  // Check and update each element if it exists
+  const dashboardHeading = document.getElementById("dashboard-heading");
+  if (dashboardHeading) {
+    dashboardHeading.innerText = `${facilityName} Dashboard`;
+  }
+
+  const occupiedCountElem = document.getElementById("occupied-count");
+  if (occupiedCountElem) {
+    occupiedCountElem.innerText = occupiedCount;
+  }
+
+  const totalCapacityElem = document.getElementById("total-capacity");
+  if (totalCapacityElem) {
+    totalCapacityElem.innerText = totalCapacity;
+  }
+
+  const dayCountElem = document.getElementById("day-count");
+  if (dayCountElem) {
+    dayCountElem.innerText = dayCount;
+  }
+
+  const addressElem = document.getElementById("facility-address");
+  if (addressElem) {
+    addressElem.innerText = address;
+  }
+
+  const occupancyRateElem = document.getElementById("occupancy-rate");
+  if (occupancyRateElem) {
+    occupancyRateElem.innerText = occupancyRate;
+  }
+
+  const facilityNameElem = document.getElementById("facility-name");
+  if (facilityNameElem) {
+    facilityNameElem.innerText = facilityName;
+  }
+
+//   if (chartData) {
+//     updateChart(chartData);
+//   }
+}
+
+// Function to update the chart using chart_data from the JSON response
+function updateChart(chartData) {
+  const ctx = document.getElementById("occupancyChart").getContext("2d");
+
+  // Assuming you are using Chart.js, you need to check if the chart already exists
+  if (window.occupancyChart) {
+    // If chart already exists, update it
+    window.occupancyChart.data.labels = chartData.labels;
+    window.occupancyChart.data.datasets[0].data = chartData.values;
+    window.occupancyChart.update();
+  } else {
+    // If the chart doesn't exist yet, create a new one
+    window.occupancyChart = new Chart(ctx, {
+      type: "line", // You can adjust the type of chart as per your requirement
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: "Median Occupancy per Hour",
+            data: chartData.values,
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
 }
 
 // Get all facility rows
