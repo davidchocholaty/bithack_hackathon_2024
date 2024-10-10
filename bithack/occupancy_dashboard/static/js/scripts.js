@@ -22,8 +22,10 @@ function handleFacilityClick(event) {
   clickedElement.classList.add("active");
 
   // Fetch facility data from the backend
-  const facilityId = clickedElement.dataset.facilityId; // Make sure to add this data attribute
-  fetch(`/facility/${facilityId}/`)
+  const facilityId = clickedElement.getAttribute("data-facility-id");
+
+  console.log(facilityId);
+  fetch(`facility/${facilityId}/`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -31,6 +33,7 @@ function handleFacilityClick(event) {
       return response.json();
     })
     .then((data) => {
+      console.log(data);
       updateDashboard(data); // Call the updateDashboard function with the fetched data
     })
     .catch((error) => {
@@ -42,23 +45,29 @@ function handleFacilityClick(event) {
 }
 
 // Function to update the dashboard content based on the clicked facility
-function updateDashboard(clickedElement) {
-  // Get facility data from the clicked element
-  const facilityName = clickedElement.querySelector("h3").innerText;
-  const occupiedCount =
-    clickedElement.querySelector(".healthbar").dataset.occupied;
-  const totalCapacity =
-    clickedElement.querySelector(".healthbar").dataset.overall;
-  const dayCount = clickedElement.dataset.dayCount; // You will need to include this data in your facility element
-  const address = clickedElement.dataset.address; // You will need to include this data in your facility element
+function updateDashboard(data) {
+  // Check if data is an object and has the expected properties
+  if (typeof data !== "object" || data === null) {
+    console.error("Invalid data format:", data);
+    return; // Exit if data is not valid
+  }
+
+  // Get facility data from the fetched JSON
+  const facilityName = data.name;
+  const occupiedCount = data.count;
+  const totalCapacity = data.capacity;
+  const dayCount = data.day_count;
+  const address = data.address;
 
   // Calculate occupancy rate
   const occupancyRate = ((occupiedCount / totalCapacity) * 100).toFixed(2);
 
-  // Update the dashboard items with facility data
+  // Update the dashboard heading with the facility name
   document.getElementById(
     "dashboard-heading"
   ).innerText = `${facilityName} Dashboard`;
+
+  // Update the dashboard items with facility data
   document.getElementById("occupied-count").innerText = occupiedCount;
   document.getElementById("total-capacity").innerText = totalCapacity;
   document.getElementById("day-count").innerText = dayCount;
