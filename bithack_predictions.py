@@ -20,6 +20,7 @@ import joblib
 import pandas as pd
 import json
 from datetime import datetime, timedelta
+from collections import OrderedDict
 
 csv_file = '/content/mean_values_hourly.csv'
 
@@ -31,9 +32,6 @@ df_csv['Měsíc'] = df_csv['Date'].dt.month
 df_csv['Den'] = df_csv['Date'].dt.day
 
 df_csv.head()
-
-# Zobrazení všech názvů sloupců v CSV DataFrame
-print(df_csv.columns)
 
 # Funkce pro výběr hodnot z CSV na základě měsíce, dne a hodiny
 def get_csv_values_for_hour(df_csv, future_time):
@@ -173,15 +171,17 @@ if weather_data:
               f"Humidity: {entry['humidity']}%, Wind: {entry['wind_speed']} m/s, "
               f"Precipitation (1h): {entry['precipitation_1h']} mm")
 
+import json
+
 def parse_starez_geojson(data_starez):
     """
-    Zpracuje GeoJSON data a vrátí seznam slovníků s vyparsovanými daty.
+    Zpracuje GeoJSON data, přidá ID k jednotlivým záznamům a vrátí je ve formátu JSON.
     """
     features = data_starez.get("features", [])
     parsed_data = []
 
     # Projdeme každou položku (feature)
-    for feature in features:
+    for index, feature in enumerate(features):
         properties = feature.get("properties", {})
         geometry = feature.get("geometry", {})
 
@@ -199,6 +199,7 @@ def parse_starez_geojson(data_starez):
 
         # Uložíme vyparsovaná data jako slovník do seznamu
         parsed_data.append({
+            'id': index + 1,  # Přidání ID (založeno na indexu, začíná od 1)
             'name': name,
             'capacity': capacity,
             'count': count,
@@ -209,84 +210,108 @@ def parse_starez_geojson(data_starez):
             'coordinates': coordinates
         })
 
-    return parsed_data
+    # Vrátíme data jako JSON
+    return json.dumps(parsed_data, ensure_ascii=False, indent=4)
 
-# Call the function with your GeoJSON data
-starez_data_parsed = parse_starez_geojson(starez_data)
+# Příklad volání funkce s GeoJSON daty
+starez_data_json = parse_starez_geojson(starez_data)
 
-# Pro kontrolu můžeš vypsat vyparsovaná data
-for entry in starez_data_parsed:
-    print(entry)
+# Výstup
+print(starez_data_json)
 
-def predict_for_hour(loaded_model, future_time, df_csv, weather_data):
+def predict_for_hour(loaded_model, future_time, df_csv, weather_data, selected_place):
     """
-    Vrací predikci pro danou hodinu (future_time) pomocí zadaného modelu a hodnot z CSV.
-    Průměrná teplota je extrahována z weather API.
+    Vrací predikci pro danou hodinu (future_time) pomocí modelu, hodnot z CSV a weather API.
+    Parametr selected_place určuje místo, pro které chceme provést predikci.
     """
-    # Získat teplotu z weather_data
+    # Mapa míst (klíče odpovídají hodnotám pro Zkratka_* v datasetu)
+    places = {
+        'Bazény Lužánky': 'Zkratka_Bazény Lužánky',
+        'Bruslení za Lužánkami': 'Zkratka_Bruslení za Lužánkami',
+        'Kluziště Vodova': 'Zkratka_Kluziště Vodova',
+        'Koupaliště Riviéra': 'Zkratka_Koupaliště Riviéra',
+        'Koupaliště Riviéra Automat': 'Zkratka_Koupaliště Riviéra Automat',
+        'Koupaliště Zábrdovice': 'Zkratka_Koupaliště Zábrdovice',
+        'Krytý plavecký bazén Ponávka': 'Zkratka_Krytý plavecký bazén Ponávka',
+        'Lázně Rašínova Bazén': 'Zkratka_Lázně Rašínova Bazén',
+        'Lázně Rašínova Posilovna': 'Zkratka_Lázně Rašínova Posilovna'
+    }
+
+    # Inicializuj místa s nulovými hodnotami
+    future_data = OrderedDict([
+        ('Měsíc', [future_time.month]),
+        ('Den', [future_time.day]),
+        ('Hodina', [future_time.hour]),
+        ('teplota prumerna_value', [0]),  # Bude přepsáno později
+        ('day_of_week', [future_time.weekday()]),
+        ('mean_abonenti', [0]),  # Bude přepsáno později
+        ('mean_verejnost', [0]),  # Bude přepsáno později
+        ('mean_rychlost_vetru', [0]),  # Bude přepsáno později
+        ('mean_tlak_vzduchu', [0]),  # Bude přepsáno později
+        ('mean_uhrn_srazek', [0]),  # Bude přepsáno později
+        ('Zkratka_Bazény Lužánky', [0]),
+        ('Zkratka_Bruslení za Lužánkami', [0]),
+        ('Zkratka_Kluziště Vodova', [0]),
+        ('Zkratka_Koupaliště Riviéra', [0]),
+        ('Zkratka_Koupaliště Riviéra Automat', [0]),
+        ('Zkratka_Koupaliště Zábrdovice', [0]),
+        ('Zkratka_Krytý plavecký bazén Ponávka', [0]),
+        ('Zkratka_Lázně Rašínova Bazén', [0]),
+        ('Zkratka_Lázně Rašínova Posilovna', [0])
+    ])
+
+    # Nastav vybrané místo na 1
+    if selected_place in places:
+        future_data[places[selected_place]] = [1]
+    else:
+        raise ValueError(f"Unknown place: {selected_place}")
+
+    # Získání teploty z API
     temperature = extract_temperature(weather_data, future_time)
 
     # Pokud není teplota dostupná, použij historickou průměrnou teplotu
     if temperature is None:
         print(f"Unable to fetch temperature for {future_time}. Using historical average.")
-        temperature = df_csv['Mean_Teplota_Max'].mean()  # Použití průměrné teploty z CSV
+        temperature = df_csv['Mean_Teplota_Max'].mean()  # Náhradní hodnota
 
     # Získat další hodnoty z CSV na základě měsíce, dne a hodiny
     csv_values = get_csv_values_for_hour(df_csv, future_time)
 
-    # Sestavit predikční data
-    future_data = {
-        'Měsíc': [future_time.month],  # Měsíc
-        'Den': [future_time.day],  # Den
-        'Hodina': [future_time.hour],  # Hodina
-        'teplota prumerna_value': [temperature],  # Teplota z API
-        'day_of_week': [future_time.weekday()],
-        'mean_abonenti': [csv_values['mean_abonenti']],
-        'mean_verejnost': [csv_values['mean_verejnost']],
-        'mean_rychlost_vetru': [csv_values['mean_rychlost_vetru']],
-        'mean_tlak_vzduchu': [csv_values['mean_tlak_vzduchu']],
-        'mean_uhrn_srazek': [csv_values['mean_uhrn_srazek']],
-        'Zkratka_Bazény Lužánky': [0],  # Example value, replace with actual value
-        'Zkratka_Bruslení za Lužánkami': [1],
-        'Zkratka_Kluziště Vodova': [0],
-        'Zkratka_Koupaliště Riviéra': [0],
-        'Zkratka_Koupaliště Riviéra Automat': [0],
-        'Zkratka_Koupaliště Zábrdovice': [0],
-        'Zkratka_Krytý plavecký bazén Ponávka': [0],
-        'Zkratka_Lázně Rašínova Bazén': [0],
-        'Zkratka_Lázně Rašínova Posilovna': [0]
-    }
+    # Aktualizace predikčních dat
+    future_data['teplota prumerna_value'] = [temperature]
+    future_data['mean_abonenti'] = [csv_values['mean_abonenti']]
+    future_data['mean_verejnost'] = [csv_values['mean_verejnost']]
+    future_data['mean_rychlost_vetru'] = [csv_values['mean_rychlost_vetru']]
+    future_data['mean_tlak_vzduchu'] = [csv_values['mean_tlak_vzduchu']]
+    future_data['mean_uhrn_srazek'] = [csv_values['mean_uhrn_srazek']]
 
     # Převést na DataFrame
     input_df = pd.DataFrame(future_data)
 
     # Proveď predikci
-    predictions = loaded_model.predict(input_df)
-    return predictions[0]
+    prediction = loaded_model.predict(input_df)
+    return prediction[0]  # Vrátí predikovanou hodnotu
 
-# Funkce pro predikce pro všechny hodiny do konce dne
-def predict_until_end_of_day(loaded_model, df_csv):
-    # Získej aktuální čas
+def predict_until_end_of_day(loaded_model, df_csv, weather_data, selected_place):
+    """
+    Vrací seznam predikcí pro všechny hodiny do konce dne ve formátu JSON.
+    """
     current_time = datetime.utcnow()
-
-    # Najdi začátek další hodiny
     next_hour_time = (current_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-
-    # Najdi čas půlnoci (konec dne)
     end_of_day = current_time.replace(hour=23, minute=0, second=0, microsecond=0)
 
-    # Vytvoří seznam predikcí od další hodiny do konce dne
     predictions = []
     future_time = next_hour_time
 
     while future_time <= end_of_day:
-        # Pro každou hodinu provedeme predikci
-        predicted_value = predict_for_hour(loaded_model, future_time, df_csv, weather_data)
-        predictions.append((future_time, predicted_value))
-        # Posuň čas o 1 hodinu
+        predicted_value = predict_for_hour(loaded_model, future_time, df_csv, weather_data, selected_place)
+        predictions.append({
+            "time": future_time.strftime('%Y-%m-%d %H:%M'),
+            "predicted_people": predicted_value
+        })
         future_time += timedelta(hours=1)
 
-    return predictions
+    return json.dumps(predictions)
 
 # Load the model
 loaded_model = joblib.load('random_forest_model_final.pkl')
@@ -295,10 +320,11 @@ df_csv['Date'] = pd.to_datetime(df_csv['Date'])
 df_csv['Měsíc'] = df_csv['Date'].dt.month
 df_csv['Den'] = df_csv['Date'].dt.day
 
-# Make predictions with the loaded model
-hourly_predictions = predict_until_end_of_day(loaded_model, df_csv)
+selected_place = 'Bazény Lužánky'
 
-# Zobrazit predikce
-for future_time, prediction in hourly_predictions:
-    print(f"Time: {future_time.strftime('%Y-%m-%d %H:%M')}, Predicted number of people: {prediction}")
+# Zavolej predikce na následující hodiny do konce dne
+json_predictions = predict_until_end_of_day(loaded_model, df_csv, weather_data, selected_place)
+
+# Výstup predikcí v JSON formátu
+print(json_predictions)
 
