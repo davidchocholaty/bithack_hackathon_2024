@@ -1,0 +1,12 @@
+<div class="facility-row {{ active_class }}" 
+     data-facility-id="{{ facility.id }}">  <!-- Add this attribute -->
+    <h3>{{ facility.name }}</h3>
+    <div class="healthbar-container">
+        <div class="healthbar" 
+             data-occupied="{{ facility.count }}" 
+             data-overall="{{ facility.capacity }}" 
+             style="width: {{ facility.occupancy_percentage }}%;">
+        </div>
+    </div>
+    <p>Active Capacity: {{ facility.count }} / {{ facility.capacity }}</p>
+</div>

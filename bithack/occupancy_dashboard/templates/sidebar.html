@@ -1,0 +1,15 @@
+<div class="sidebar">
+    <h1 class='bold'>STAREZ Facilities</h1>
+    <div class="facility-wrap">
+    {% for facility in facilities %}
+        {% if forloop.first %}
+            {% include 'facility.html' with facility=facility active_class='active' %}
+        {% else %}
+            {% include 'facility.html' with facility=facility active_class='' %}
+        {% endif %}
+    {% empty %}
+        <p>No facilities available.</p>
+    {% endfor %}
+    </div>
+
+</div>

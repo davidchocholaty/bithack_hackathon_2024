@@ -1,0 +1,123 @@
+:root {
+  --background-colour: #fcf6f6;
+  --text-colour: #1a0c0c;
+  --primary: #c83732;
+  --secondary: #e19895;
+  --accent: #db6c68;
+}
+
+/* Base styles */
+* {
+  font-family: "Roboto", Arial, sans-serif;
+  box-sizing: border-box;
+}
+html,
+body p {
+  margin: 0;
+}
+html,
+body > * {
+  background-color: var(--background-color-dark-mode);
+  color: var(--text-color-dark-mode);
+}
+/* Fonts */
+
+.bold {
+  font-weight: bold;
+}
+html,
+body {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html,
+  body {
+    font-size: 16px;
+  }
+}
+
+.heading {
+  font-size: 3rem;
+}
+
+/* ====== MAIN PAGE LAYOUT ====== */
+.dash-wrapper {
+  display: flex;
+  gap: 30px;
+
+  height: 100vh;
+}
+/* ======  SIDEBAR  ====== */
+.sidebar {
+  background-color: white;
+  width: 350px;
+  padding: 50px 30px;
+}
+
+.sidebar h1 {
+    padding-bottom: 20px;
+}
+/* Facilities */
+.facility-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.facility-row {
+    cursor: pointer;
+    border-radius: 15px;
+    padding: 20px;
+}
+/* Healthbar */
+.healthbar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    height: 10px;
+    margin-bottom: 10px; /* Space between health bars */
+}
+.healthbar {
+    height: 100%;
+    background-color: #76c7c0; /* Default color */
+    transition: width 1s;
+}
+.healthbar-full {
+    background-color: #76c7c0; /* Good occupancy */
+}
+.healthbar-warning {
+    background-color: #ffcc00; /* Warning color */
+}
+.healthbar-danger {
+    background-color: #ff4444; /* Danger color */
+}
+
+.facility-row.active {
+    background-color: var(--primary);
+    color: white;
+    border-radius: 15px;
+}
+/* ====== DASHBOARD ====== */
+.dashboard {
+  flex: 1;
+  color: #111504;
+  background-color: #efeaea;
+  padding: 50px;
+}
+
+.stats-columns > div > div {
+  height: 150px;
+  padding: 20px;
+  border-radius: 15px;
+  background-color: var(--secondary);
+}
+
+.plot-columns > div > div {
+  height: 150px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 15px;
+}
