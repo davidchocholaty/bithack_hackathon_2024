@@ -4,3 +4,6 @@ This repository contains code tasks for the *BIT_Hack* hackathon, created in 202
 - **Team**: Team Hackson
 - **Category**: Data Master
 - **Assignment Authors**: data.Brno
+ 
+## App Preview
+![App Preview](app.png)
